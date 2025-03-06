@@ -20,6 +20,7 @@ def process_fit_file(filepath):
         activity_info = {
             'filename': os.path.basename(filepath),
             'start_time': None,
+            'total_time': None,
             'moving_time': None,
             'distance': None,
             'heart_rate_data': [],  # Stores (timestamp, heart_rate)
@@ -31,6 +32,8 @@ def process_fit_file(filepath):
             for data in record:
                 if data.name == 'start_time':
                     activity_info['start_time'] = data.value
+                elif data.name == 'total_elapsed_time':
+                    activity_info['total_time'] = data.value
                 elif data.name == 'total_timer_time':
                     activity_info['moving_time'] = data.value
                 elif data.name == 'total_distance':
@@ -134,10 +137,10 @@ def main():
 
         if activity_info:
             print("Activity:", activity_info['filename'])
-            if activity_info['start_time']:
-                print(
-                    "Date:",
-                    activity_info['start_time'].strftime("%Y-%m-%d %H:%M:%S"))
+            print("Date:",
+                  activity_info['start_time'].strftime("%Y-%m-%d %H:%M:%S"))
+            print("Duration (total):",
+                  format_duration(activity_info['total_time']))
             print("Duration (moving):",
                   format_duration(activity_info['moving_time']))
             print("Distance:", format_distance(activity_info['distance']))

@@ -101,7 +101,7 @@ def calculate_time_in_zones(heart_rate_data, speed_data):
                     break  # Stop at the first matching zone
 
     print(
-        f"DEBUG: Total moving time in zones: {format_duration(total_moving_time)}"
+        f"DEBUG: Total moving time in zones (> 2.78m/s | 10km/h): {format_duration(total_moving_time)}"
     )
     return zone_times
 

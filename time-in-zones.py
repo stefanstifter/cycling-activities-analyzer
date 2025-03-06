@@ -15,12 +15,15 @@ def process_fit_file(filepath):
     """Process a single FIT file and return activity information."""
     try:
         fitfile = FitFile(filepath)
+
+        # Get basic activity info
         activity_info = {
             'filename': os.path.basename(filepath),
             'start_time': None,
             'moving_time': None,
             'distance': None,
-            'heart_rate_data': [],
+            'heart_rate_data': [],  # Stores (timestamp, heart_rate)
+            'speed_data': []  # Stores speed values
         }
 
         # Extract activity information from the session messages
@@ -28,26 +31,22 @@ def process_fit_file(filepath):
             for data in record:
                 if data.name == 'start_time':
                     activity_info['start_time'] = data.value
-                elif data.name == 'total_timer_time':  # Moving time
+                elif data.name == 'total_timer_time':
                     activity_info['moving_time'] = data.value
                 elif data.name == 'total_distance':
                     activity_info['distance'] = data.value
 
-        # Extract heart rate data from the record messages
-        prev_timestamp = None
+        # Extract heart rate & speed data from the record messages
         for record in fitfile.get_messages('record'):
             record_data = {field.name: field.value for field in record}
 
             if "timestamp" in record_data and "heart_rate" in record_data:
-                curr_timestamp = record_data["timestamp"]
-                heart_rate = record_data["heart_rate"]
+                activity_info['heart_rate_data'].append(
+                    (record_data["timestamp"], record_data["heart_rate"]))
 
-                # Only include HR data if timestamps move forward
-                # (avoids duplicates or resets)
-                if prev_timestamp is None or curr_timestamp > prev_timestamp:
-                    activity_info['heart_rate_data'].append(
-                        (curr_timestamp, heart_rate))
-                    prev_timestamp = curr_timestamp
+                # Extract speed (default to 0 if missing)
+                speed = record_data.get("speed", 0)
+                activity_info['speed_data'].append(speed)
 
         return activity_info
 
@@ -73,28 +72,34 @@ def format_distance(meters):
     return f"{meters/1000:.2f} km"
 
 
-def calculate_time_in_zones(heart_rate_data):
+def calculate_time_in_zones(heart_rate_data, speed_data):
     """Computes time spent in each heart rate zone based on moving time."""
     zone_times = defaultdict(int)
+    total_moving_time = 0
 
     if not heart_rate_data:
         print("DEBUG: No heart rate data found.")
         return zone_times
 
-    total_tracked_time = 0
-
     for i in range(1, len(heart_rate_data)):
         prev_time, prev_hr = heart_rate_data[i - 1]
         curr_time, curr_hr = heart_rate_data[i]
+        prev_speed = speed_data[i - 1] if i - 1 < len(
+            speed_data) else 0  # Default to 0 if missing
+
         duration = (curr_time - prev_time).total_seconds()
-        total_tracked_time += duration
 
-        for zone, (low, high) in HR_ZONES.items():
-            if low <= prev_hr <= high:
-                zone_times[zone] += duration
-                break  # Stop at the first matching zone
+        # Only count time intervals where speed > threshold (we're moving)
+        if prev_speed > 2.78:  # 2.2 m/s = 8 km/h | 2.78 m/s = 10 km/h
+            total_moving_time += duration
+            for zone, (low, high) in HR_ZONES.items():
+                if low <= prev_hr <= high:
+                    zone_times[zone] += duration
+                    break  # Stop at the first matching zone
 
-    print(f"DEBUG: Total time in zones: {format_duration(total_tracked_time)}")
+    print(
+        f"DEBUG: Total moving time in zones: {format_duration(total_moving_time)}"
+    )
     return zone_times
 
 
@@ -137,9 +142,8 @@ def main():
                   format_duration(activity_info['moving_time']))
             print("Distance:", format_distance(activity_info['distance']))
 
-            # Compute and display time in zones
             time_in_zones = calculate_time_in_zones(
-                activity_info["heart_rate_data"])
+                activity_info["heart_rate_data"], activity_info["speed_data"])
             for zone, time in time_in_zones.items():
                 formatted_time = format_seconds_to_hms(time)
                 print(f"{zone}: {formatted_time}")

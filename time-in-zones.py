@@ -31,7 +31,7 @@ def process_fit_file(filepath):
 
         for record in fitfile.get_messages('session'):
             for data in record:
-                if data.name == 'start_time':
+                if data.name == 'start_time' and data.value is not None:
                     activity_info['start_time'] = data.value
                 elif data.name == 'total_elapsed_time':
                     activity_info['total_time'] = data.value
@@ -50,6 +50,8 @@ def process_fit_file(filepath):
                 speed = record_data.get("speed", 0)
                 activity_info['speed_data'].append(speed)
 
+        if activity_info['start_time'] is None:
+            print(f"Warning: No start_time found in {filepath}")
         return activity_info
 
     except Exception as e:
@@ -93,7 +95,7 @@ def calculate_time_in_zones(heart_rate_data, speed_data):
         if prev_speed > 2.78:  # 10 km/h
             total_moving_time += duration
             for zone, (low, high) in HR_ZONES.items():
-                if low <= prev_hr <= high:
+                if prev_hr is not None and low <= prev_hr <= high:
                     zone_times[zone] += duration
                     break
 
@@ -151,8 +153,12 @@ def main():
 
         if activity_info:
             print("Activity:", activity_info['filename'])
-            print("Date:",
-                  activity_info['start_time'].strftime("%Y-%m-%d %H:%M:%S"))
+            if activity_info['start_time']:
+                print(
+                    "Date:",
+                    activity_info['start_time'].strftime("%Y-%m-%d %H:%M:%S"))
+            else:
+                print("Date: unavailable")
             print("Duration (total):",
                   format_duration(activity_info['total_time']))
             print("Duration (moving):",
@@ -168,8 +174,14 @@ def main():
 
             print("-" * 50)
 
+            if activity_info['start_time']:
+                start_formatted = activity_info['start_time'].strftime(
+                    "%Y-%m-%d %H:%M:%S")
+            else:
+                start_formatted = "Unknown"
+
             csv_data = [
-                activity_info['start_time'].strftime("%Y-%m-%d %H:%M:%S"),
+                start_formatted,
                 "",
                 format_distance(activity_info['distance']),
                 format_duration(activity_info['total_time']),

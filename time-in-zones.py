@@ -11,7 +11,7 @@ HR_ZONES = {
     "Z5": (151, 999),
 }
 
-CSV_FILENAME = "activity_summary.csv"
+CSV_FILENAME = "activities.csv"
 
 
 def process_fit_file(filepath):
@@ -176,7 +176,7 @@ def main():
 
             if activity_info['start_time']:
                 start_formatted = activity_info['start_time'].strftime(
-                    "%Y-%m-%d %H:%M:%S")
+                    "%Y-%m-%d")
             else:
                 start_formatted = "Unknown"
 

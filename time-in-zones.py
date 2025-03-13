@@ -91,7 +91,6 @@ def calculate_time_in_zones(heart_rate_data, speed_data):
         prev_time, prev_hr = heart_rate_data[i - 1]
         curr_time, curr_hr = heart_rate_data[i]
         prev_speed = speed_data[i - 1] if i - 1 < len(speed_data) else 0
-
         duration = (curr_time - prev_time).total_seconds()
 
         if prev_speed > 2.22:  # 8 km/h
@@ -102,7 +101,7 @@ def calculate_time_in_zones(heart_rate_data, speed_data):
                     break
 
     print(
-        f"DEBUG: Total moving time in zones (> 8km/h): {format_duration(total_moving_time)}"
+        f"Total moving time in zones (> 8km/h): {format_duration(total_moving_time)}"
     )
     return zone_times
 
@@ -124,7 +123,7 @@ def write_to_csv(data):
 
         if not file_exists:
             writer.writerow([
-                "Date", "Ruhe Puls", "Distance in km", "Duration (total)",
+                "Date", "Distance in km", "Duration (total)",
                 "Time in Z1", "Time in Z2", "Time in Z3", "Time in Z4",
                 "Time in Z5", "Duration (moving)"
             ])
@@ -183,7 +182,6 @@ def main():
 
             csv_data = [
                 start_formatted,
-                "",
                 format_distance(activity_info['distance']),
                 format_duration(activity_info['total_time']),
                 format_seconds_to_hms(time_in_zones.get("Z1", 0)),

@@ -11,7 +11,9 @@ HR_ZONES = {
     "Z5": (151, 999),
 }
 
-CSV_FILENAME = "activities.csv"
+CSV_FILENAME = "zones.csv"
+
+ACTIVITIES_DIR = "activity-files"
 
 
 def process_fit_file(filepath):
@@ -92,7 +94,7 @@ def calculate_time_in_zones(heart_rate_data, speed_data):
 
         duration = (curr_time - prev_time).total_seconds()
 
-        if prev_speed > 2.78:  # 10 km/h
+        if prev_speed > 2.22:  # 8 km/h
             total_moving_time += duration
             for zone, (low, high) in HR_ZONES.items():
                 if prev_hr is not None and low <= prev_hr <= high:
@@ -100,7 +102,7 @@ def calculate_time_in_zones(heart_rate_data, speed_data):
                     break
 
     print(
-        f"DEBUG: Total moving time in zones (> 2.78m/s | 10km/h): {format_duration(total_moving_time)}"
+        f"DEBUG: Total moving time in zones (> 8km/h): {format_duration(total_moving_time)}"
     )
     return zone_times
 
@@ -133,22 +135,21 @@ def write_to_csv(data):
 def main():
     print("Let's process some \"Fit\" files!")
 
-    activities_dir = "activity-files"
-    if not os.path.exists(activities_dir):
-        print(f"Error: Directory {activities_dir} not found.")
+    if not os.path.exists(ACTIVITIES_DIR):
+        print(f"Error: Directory {ACTIVITIES_DIR} not found.")
         return
 
     fit_files = [
-        f for f in os.listdir(activities_dir) if f.lower().endswith('.fit')
+        f for f in os.listdir(ACTIVITIES_DIR) if f.lower().endswith('.fit')
     ]
     if not fit_files:
-        print(f"No .fit files found in {activities_dir}")
+        print(f"No .fit files found in {ACTIVITIES_DIR}")
         return
 
     print(f"Found {len(fit_files)} FIT files to process\n")
 
     for filename in sorted(fit_files):
-        filepath = os.path.join(activities_dir, filename)
+        filepath = os.path.join(ACTIVITIES_DIR, filename)
         activity_info = process_fit_file(filepath)
 
         if activity_info:

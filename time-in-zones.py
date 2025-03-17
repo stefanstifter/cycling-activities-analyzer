@@ -16,6 +16,8 @@ CSV_FILENAME = "zones.csv"
 
 ACTIVITIES_DIR = "activity-files"
 
+THRESHOLD_SPEED = 1.33  # 4.8 km/h
+
 
 def process_fit_file(filepath):
     """Process a single FIT file and return activity information."""
@@ -94,7 +96,7 @@ def calculate_time_in_zones(heart_rate_data, speed_data):
         prev_speed = speed_data[i - 1] if i - 1 < len(speed_data) else 0
         duration = (curr_time - prev_time).total_seconds()
 
-        if prev_speed > 2.22:  # 8 km/h
+        if prev_speed > THRESHOLD_SPEED:
             total_moving_time += duration
             for zone, (low, high) in HR_ZONES.items():
                 if prev_hr is not None and low <= prev_hr <= high:
@@ -102,7 +104,7 @@ def calculate_time_in_zones(heart_rate_data, speed_data):
                     break
 
     print(
-        f"Total moving time in zones (> 8km/h): {format_duration(total_moving_time)}"
+        f"Total moving time in zones (> {THRESHOLD_SPEED} m/s): {format_duration(total_moving_time)}"
     )
     return zone_times
 

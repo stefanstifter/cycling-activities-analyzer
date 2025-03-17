@@ -1,5 +1,6 @@
 import os
 import csv
+import zipfile
 from fitparse import FitFile
 from collections import defaultdict
 
@@ -123,9 +124,9 @@ def write_to_csv(data):
 
         if not file_exists:
             writer.writerow([
-                "Date", "Distance in km", "Duration (total)",
-                "Time in Z1", "Time in Z2", "Time in Z3", "Time in Z4",
-                "Time in Z5", "Duration (moving)"
+                "Date", "Distance in km", "Duration (total)", "Time in Z1",
+                "Time in Z2", "Time in Z3", "Time in Z4", "Time in Z5",
+                "Duration (moving)"
             ])
 
         writer.writerow(data)
@@ -137,6 +138,16 @@ def main():
     if not os.path.exists(ACTIVITIES_DIR):
         print(f"Error: Directory {ACTIVITIES_DIR} not found.")
         return
+
+    # First unpack all .zip files in the directory
+    zip_files = [
+        f for f in os.listdir(ACTIVITIES_DIR) if f.lower().endswith('.zip')
+    ]
+    for zip_file in zip_files:
+        zip_path = os.path.join(ACTIVITIES_DIR, zip_file)
+        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+            zip_ref.extractall(ACTIVITIES_DIR)
+        print(f"Unpacked {zip_file}")
 
     fit_files = [
         f for f in os.listdir(ACTIVITIES_DIR) if f.lower().endswith('.fit')

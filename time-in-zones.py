@@ -104,7 +104,7 @@ def calculate_time_in_zones(heart_rate_data, speed_data):
                     break
 
     print(
-        f"Total moving time in zones (> {THRESHOLD_SPEED} m/s): {format_duration(total_moving_time)}"
+        f"Total moving time in zones (> {THRESHOLD_SPEED} m/s | {THRESHOLD_SPEED * 3.6:.2f} km/h): {format_duration(total_moving_time)}"
     )
     return zone_times
 

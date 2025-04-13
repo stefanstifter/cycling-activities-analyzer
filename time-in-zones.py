@@ -134,14 +134,25 @@ def write_to_csv(data):
         writer.writerow(data)
 
 
+def cleanup_files(fit_filename):
+    done_dir = os.path.join(ACTIVITIES_DIR, "done")
+    if not os.path.exists(done_dir):
+        os.makedirs(done_dir)
+
+    src_path = os.path.join(ACTIVITIES_DIR, fit_filename)
+    dst_path = os.path.join(done_dir, fit_filename)
+    if os.path.exists(src_path):
+        os.rename(src_path, dst_path)
+
+
 def main():
-    print("Let's process some \"Fit\" files!")
+    print("Let's process some \"fit\" files!")
 
     if not os.path.exists(ACTIVITIES_DIR):
         print(f"Error: Directory {ACTIVITIES_DIR} not found.")
         return
 
-    # First unpack all .zip files in the directory
+    # unpack all .zip files in the directory
     zip_files = [
         f for f in os.listdir(ACTIVITIES_DIR) if f.lower().endswith('.zip')
     ]
@@ -206,6 +217,19 @@ def main():
             ]
 
             write_to_csv(csv_data)
+
+            if activity_info and 'filename' in activity_info:
+                cleanup_files(activity_info['filename'])
+
+    for zip_file in zip_files:
+        zip_path = os.path.join(ACTIVITIES_DIR, zip_file)
+        if os.path.exists(zip_path):
+            os.remove(zip_path)
+
+    print(f"All files processed. All .fit files moved "
+          f"to {os.path.join(ACTIVITIES_DIR, 'done/')} directory. "
+          f"All zip files deleted. ")
+    print(f"Check the CSV for results: {CSV_FILENAME}")
 
 
 if __name__ == "__main__":

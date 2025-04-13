@@ -1,8 +1,12 @@
-# Cycling Activities Analyzer
-analyze .fit files for basic cycling activity statistics.
+# Time In Zones - Cycling Activities Analyzer
 
-## Run
-`python3 time-in-zones.py`
+analyze garmin .fit files and provide basic cycling activity data.  
+(date, duration, distance, total moving time, time in heart rate zone)  
+
+## Usage
+  - provide .fit file or .zip (containing the .fit file) in `activity-files/` folder
+  - run: `python3 time-in-zones.py`
+  - data in: `zones.csv`
 
 ## Dependencies
 Make sure these depencencies are installed:  

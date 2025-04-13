@@ -1,17 +1,20 @@
-# Time In Zones - Cycling Activities Analyzer
+# Time In Zones – Cycling Activities Analyzer
 
-analyze garmin .fit files and provide basic cycling activity data.  
-(date, duration, distance, total moving time, time in heart rate zone)  
+analyze garmin .fit files for time spent per heart rate zone.  
+also shows basic activity data (date, duration, distance, moving time).  
+writes results into `zones.csv`.
 
-## Usage
-  - provide .fit file or .zip (containing the .fit file) in `activity-files/` folder
-  - run: `python3 time-in-zones.py`
-  - data in: `zones.csv`
+:warning: after processing, all `.zip` files in `activity-files/` will be deleted.  
+the extracted `.fit` files will be moved to `done/`.
 
 ## Dependencies
-Make sure these depencencies are installed:  
-  - [python-fitparse](https://github.com/dtcooper/python-fitparse) is installed  
-    `pip3 install fitparse`
 
-## @ToDo
-  - move files into `done/` folder or something like that
+make sure these are installed:  
+- `pip3 install fitparse`  
+  [python-fitparse](https://github.com/dtcooper/python-fitparse)
+
+## Usage
+
+1. put `.fit` or `.zip` (containing a `.fit`) into `activity-files/`
+2. run: `python3 time-in-zones.py`
+3. view: `zones.csv`
